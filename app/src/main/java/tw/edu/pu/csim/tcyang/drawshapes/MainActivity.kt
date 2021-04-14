@@ -1,5 +1,6 @@
 package tw.edu.pu.csim.tcyang.drawshapes
 
+import android.graphics.Bitmap
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -7,6 +8,8 @@ import android.view.MotionEvent
 import android.view.View
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
+import org.tensorflow.lite.support.image.TensorImage
+import tw.edu.pu.csim.tcyang.drawshapes.ml.Shapes
 
 class MainActivity : AppCompatActivity(),
     View.OnClickListener, View.OnTouchListener{
@@ -30,8 +33,27 @@ class MainActivity : AppCompatActivity(),
     override fun onTouch(p0: View?, event: MotionEvent): Boolean {
         draw_view.onTouchEvent(event)
         if (event.action == MotionEvent.ACTION_UP){
-            Toast.makeText(this, "手指彈起",Toast.LENGTH_SHORT).show()
+            //Toast.makeText(this, "手指彈起",Toast.LENGTH_SHORT).show()
+            classifyDrawing(draw_view.getBitmap())
         }
         return true
     }
+
+    fun classifyDrawing(bitmap:Bitmap) {
+        val model = Shapes.newInstance(this)
+
+        // Creates inputs for reference.
+        val image = TensorImage.fromBitmap(bitmap)
+
+        // Runs model inference and gets result.
+        val outputs = model.process(image)
+        val probability = outputs.probabilityAsCategoryList
+
+        // Releases model resources if no longer used.
+        model.close()
+
+        Toast.makeText(this, probability.toString(), Toast.LENGTH_SHORT).show()
+    }
+
+
 }
