@@ -46,13 +46,26 @@ class MainActivity : AppCompatActivity(),
         val image = TensorImage.fromBitmap(bitmap)
 
         // Runs model inference and gets result.
+        //val outputs = model.process(image)
+        //val probability = outputs.probabilityAsCategoryList
         val outputs = model.process(image)
-        val probability = outputs.probabilityAsCategoryList
+                .probabilityAsCategoryList.apply {
+                    sortByDescending { it.score } // 排序，高匹配率優先
+                }.take(1)  //取最高的1個
+
+        var Result:String = ""
+        when (outputs[0].label) {
+            "circle" -> Result = "圓形"
+            "square" -> Result = "正方形"
+            "star" -> Result = "星形"
+            "triangle" -> Result = "三角形"
+        }
+        Result += ": " + String.format("%.1f%%", outputs[0].score * 100.0f)
 
         // Releases model resources if no longer used.
         model.close()
 
-        Toast.makeText(this, probability.toString(), Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, Result, Toast.LENGTH_SHORT).show()
     }
 
 
