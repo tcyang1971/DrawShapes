@@ -51,16 +51,18 @@ class MainActivity : AppCompatActivity(),
         val outputs = model.process(image)
                 .probabilityAsCategoryList.apply {
                     sortByDescending { it.score } // 排序，高匹配率優先
-                }.take(1)  //取最高的1個
+                }.take(2)  //取最高的n個
 
         var Result:String = ""
-        when (outputs[0].label) {
-            "circle" -> Result = "圓形"
-            "square" -> Result = "正方形"
-            "star" -> Result = "星形"
-            "triangle" -> Result = "三角形"
+        for (output in outputs){
+            when (output.label) {
+                "circle" -> Result += "圓形"
+                "square" -> Result += "正方形"
+                "star" -> Result += "星形"
+                "triangle" -> Result += "三角形"
+            }
+            Result += ": " + String.format("%.1f%%", output.score * 100.0f) + "; "
         }
-        Result += ": " + String.format("%.1f%%", outputs[0].score * 100.0f)
 
         // Releases model resources if no longer used.
         model.close()
